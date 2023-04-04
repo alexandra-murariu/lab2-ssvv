@@ -5,6 +5,8 @@ import domain.Student;
 import domain.Tema;
 import service.Service;
 import validation.ValidationException;
+
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -103,19 +105,49 @@ public class UI {
         if (service.findStudent(idStudent) != null) {
             throw new ValidationException("Studentul exista!");
         }
+        try{
+            Integer.parseInt(idStudent);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("ID should be an integer!");
+        }
+        BigInteger zero = BigInteger.valueOf(0);
+        BigInteger id = new BigInteger(idStudent);
+        BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
+        if(id.compareTo(zero) < 0) {
+            throw new ValidationException("ID should be positive!");
+        }
+        if(id.compareTo(maxInt) < 0) {
+            throw new ValidationException("ID should be less than maxint!");
+        }
         System.out.print("Introduceti numele: ");
         scanner.nextLine();
         String numeStudent = scanner.nextLine();
+        if(numeStudent == null)
+            throw new ValidationException("Name should not be empty!");
         System.out.print("Introduceti grupa: ");
-        int grupa = scanner.nextInt();
+        String grupa = scanner.next();
+        try{
+            Integer.parseInt(grupa);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Group should be an integer!");
+        }
+        BigInteger group = new BigInteger(grupa);
+        if(group.compareTo(zero) < 0) {
+            throw new ValidationException("Group should be positive!");
+        }
+        if(group.compareTo(maxInt) < 0) {
+            throw new ValidationException("group should be less than maxint!");
+        }
         System.out.print("Introduceti email: ");
         String email = scanner.next();
-        Student student = new Student(idStudent, numeStudent, grupa, email);
+        if(email == null)
+            throw new ValidationException("Name should not be empty!");
+        Student student = new Student(idStudent, numeStudent, Integer.parseInt(grupa), email);
         Student student1 = service.addStudent(student);
         if (student1 == null) {
             System.out.println("Student adaugat cu succes!");
         } else {
-            System.out.println("Studentul deja exista" + student1);
+            System.out.println("Studentul deja exista: " + student1);
         }
     }
 
