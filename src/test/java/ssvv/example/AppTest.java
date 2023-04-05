@@ -1,6 +1,7 @@
 package ssvv.example;
 
 import domain.Student;
+import domain.Tema;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 import repository.NotaXMLRepo;
@@ -275,6 +276,50 @@ public class AppTest extends TestCase {
         service.addStudent(new Student("1212", "aaa", 0, "aaa"));
         assertTrue(service.findStudent("1212") != null);
         service.deleteStudent("1212");
+
+    }
+
+    @Test
+    public void addAssignmentEmptyDescription() {
+        StudentValidator studentValidator = new StudentValidator();
+        TemaValidator temaValidator = new TemaValidator();
+        String filenameStudent = "fisiere/Studenti.xml";
+        String filenameTema = "fisiere/Teme.xml";
+        String filenameNota = "fisiere/Note.xml";
+        StudentXMLRepo studentXMLRepository = new StudentXMLRepo(filenameStudent);
+        TemaXMLRepo temaXMLRepository = new TemaXMLRepo(filenameTema);
+        NotaValidator notaValidator = new NotaValidator(studentXMLRepository, temaXMLRepository);
+        NotaXMLRepo notaXMLRepository = new NotaXMLRepo(filenameNota);
+        Service service = new Service(studentXMLRepository, studentValidator, temaXMLRepository, temaValidator, notaXMLRepository, notaValidator);
+
+        try {
+            service.addTema(new Tema("1", "", 2, 1));
+            fail();
+        } catch (ValidationException e) {
+            return;
+        }
+
+    }
+
+    @Test
+    public void addAssignmentInvalidDeadline() {
+        StudentValidator studentValidator = new StudentValidator();
+        TemaValidator temaValidator = new TemaValidator();
+        String filenameStudent = "fisiere/Studenti.xml";
+        String filenameTema = "fisiere/Teme.xml";
+        String filenameNota = "fisiere/Note.xml";
+        StudentXMLRepo studentXMLRepository = new StudentXMLRepo(filenameStudent);
+        TemaXMLRepo temaXMLRepository = new TemaXMLRepo(filenameTema);
+        NotaValidator notaValidator = new NotaValidator(studentXMLRepository, temaXMLRepository);
+        NotaXMLRepo notaXMLRepository = new NotaXMLRepo(filenameNota);
+        Service service = new Service(studentXMLRepository, studentValidator, temaXMLRepository, temaValidator, notaXMLRepository, notaValidator);
+
+        try {
+            service.addTema(new Tema("1", "aaa", 0, 1));
+            fail();
+        } catch (ValidationException e) {
+            return;
+        }
 
     }
 
