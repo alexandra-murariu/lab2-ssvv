@@ -1,10 +1,18 @@
 package ssvv.example;
 
+import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import domain.Nota;
 import domain.Student;
 import domain.Tema;
-import junit.framework.TestCase;
-import org.junit.jupiter.api.Test;
 import repository.NotaXMLRepo;
 import repository.StudentXMLRepo;
 import repository.TemaXMLRepo;
@@ -13,13 +21,28 @@ import validation.NotaValidator;
 import validation.StudentValidator;
 import validation.TemaValidator;
 import validation.ValidationException;
-import java.time.LocalDate;
-import static org.junit.Assert.*;
 
+import java.time.LocalDate;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 /**
  * Unit test for simple App.
  */
-public class AppTest extends TestCase {
+@ExtendWith(MockitoExtension.class)
+public class AppTest {
+    @Mock
+    private StudentXMLRepo stuxmlrepo;
+    private TemaXMLRepo temaxmlrepo;
+
+    @BeforeEach
+    public void setUp() {
+        stuxmlrepo = mock(StudentXMLRepo.class);
+        temaxmlrepo = mock(TemaXMLRepo.class);
+    }
+
     @Test
     public void addStudentEmptyId() {
         StudentValidator studentValidator = new StudentValidator();
@@ -457,6 +480,65 @@ public class AppTest extends TestCase {
         service.deleteTema("12");
         service.deleteNota("1");
     }
-
+    @Test
+    public void incrementalAddStudentAddAssignment(){
+        StudentValidator studentValidator = new StudentValidator();
+        TemaValidator temaValidator = new TemaValidator();
+        //String filenameStudent = "fisiere/Studenti.xml";
+        when(stuxmlrepo.findOne("612345")).thenReturn(null);
+        String filenameTema = "fisiere/Teme.xml";
+        String filenameNota = "fisiere/Note.xml";
+        //StudentXMLRepo studentXMLRepository = new StudentXMLRepo(filenameStudent);
+        TemaXMLRepo temaXMLRepository = new TemaXMLRepo(filenameTema);
+        NotaValidator notaValidator = new NotaValidator(stuxmlrepo, temaXMLRepository);
+        NotaXMLRepo notaXMLRepository = new NotaXMLRepo(filenameNota);
+        Service service = new Service(stuxmlrepo, studentValidator, temaXMLRepository, temaValidator, notaXMLRepository, notaValidator);
+        String data = "2023-05-05";
+        String[] date = data.split("-");
+        LocalDate dataPredare = LocalDate.of(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+        try {
+            service.addStudent(new Student("612345", "bbb", 935, "aaa@aaa.com"));
+            service.addTema(new Tema("12", "aaa", 8, 6));
+            //service.addNota(new Nota("1", "612345", "12", 9.00, dataPredare), "feedback");
+        } catch (ValidationException e) {
+            System.out.println(e.toString());
+            fail();
+            return;
+        }
+        service.deleteStudent("612345");
+        service.deleteTema("12");
+        service.deleteNota("1");
+    }
+    @Test
+    public void incrementalAddStudentAddAssignmentAddGrade(){
+        StudentValidator studentValidator = new StudentValidator();
+        TemaValidator temaValidator = new TemaValidator();
+        //String filenameStudent = "fisiere/Studenti.xml";
+        when(stuxmlrepo.findOne("612345")).thenReturn(null);
+        when(stuxmlrepo.findOne("121212")).thenReturn(new Student("aa", "bb", 9, "cc"));
+        when(temaxmlrepo.findOne("12")).thenReturn(new Tema("1", "a", 8, 8));
+        //String filenameTema = "fisiere/Teme.xml";
+        String filenameNota = "fisiere/Note.xml";
+        //StudentXMLRepo studentXMLRepository = new StudentXMLRepo(filenameStudent);
+        //TemaXMLRepo temaXMLRepository = new TemaXMLRepo(filenameTema);
+        NotaValidator notaValidator = new NotaValidator(stuxmlrepo, temaxmlrepo);
+        NotaXMLRepo notaXMLRepository = new NotaXMLRepo(filenameNota);
+        Service service = new Service(stuxmlrepo, studentValidator, temaxmlrepo, temaValidator, notaXMLRepository, notaValidator);
+        String data = "2023-05-05";
+        String[] date = data.split("-");
+        LocalDate dataPredare = LocalDate.of(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
+        try {
+            service.addStudent(new Student("612345", "bbb", 935, "aaa@aaa.com"));
+            service.addTema(new Tema("12", "aaa", 8, 6));
+            service.addNota(new Nota("1", "121212", "12", 9.00, dataPredare), "feedback");
+        } catch (ValidationException e) {
+            System.out.println(e.toString());
+            fail();
+            return;
+        }
+        service.deleteStudent("612345");
+        service.deleteTema("12");
+        service.deleteNota("1");
+    }
 
 }
